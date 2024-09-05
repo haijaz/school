@@ -19,16 +19,26 @@ def extract_data_from_pdf(filename):
         for page in reader.pages:
             text += page.extract_text()
     
+    # Check if the PDF is for the 2023-2024 school year
+    # Check if the PDF is for the 2023-2024 school year
+    school_year_pattern = r'(?:20\d{2}-20\d{2}|20\d{2}-\d{2})\s*School\s*Year'
+    school_year_match = re.search(school_year_pattern, text, re.IGNORECASE)
+    
+    if not school_year_match or '2023-2024' not in school_year_match.group():
+        print(f"Skipping {filename}: Not from 2023-2024 school year")
+        return None
+    
     # Extract school name
     name_match = re.search(r'School Name:\s*(.*?)\n', text)
     if name_match:
         school_data['name'] = name_match.group(1)
+        print(f"School name: {school_data['name']}")
     
     # Extract performance score
     performance_match = re.search(r'Overall Score:\s*(\d+)', text)
     if performance_match:
         school_data['performance'] = performance_match.group(1)
-    
+        print(f"Performance: {school_data['performance']}")
     # Check if the school has 8th, 9th, 10th, 11th, or 12th grade
     grade_pattern = r'Grade (?:8|9|10|11|12):\s*\d+'
     if re.search(grade_pattern, text):
@@ -42,8 +52,8 @@ def extract_data_from_pdf(filename):
 def process_or_download_pdfs(pdf_directory):
     schools = []
     
-    # Always check the website for PDFs
-    url = "https://mydata.dallasisd.org/SL/SD/cdp.jsp"
+    # Use the specific URL for the 2023-2024 school year
+    url = "https://mydata.dallasisd.org/SL/SD/cdp.jsp?year=#2023-24"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
     
