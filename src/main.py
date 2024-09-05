@@ -1,22 +1,23 @@
-from scraper.school_scraper import scrape_disd_high_schools
-from scraper.housing_scraper import scrape_housing_data
+import os
+from scraper.school_scraper import process_or_download_pdfs
 from analysis.data_analysis import analyze_data
 
 def main():
-    # Scrape school data
-    school_data = scrape_disd_high_schools()
+    # Create 'data' directory if it doesn't exist
+    os.makedirs('data', exist_ok=True)
+
+    # Process local PDF files or download if not available
+    pdf_directory = 'C:\\dev\\school\\src\\data'
+    school_data = process_or_download_pdfs(pdf_directory)
     
-    # Get relevant zip codes from school data
-    zip_codes = school_data['zip_code'].unique().tolist()
-    
-    # Scrape housing data
-    housing_data = scrape_housing_data(zip_codes)
-    
-    # Analyze data
-    results = analyze_data()
-    
-    # Output results (you could save to a file, display in a web app, etc.)
-    print(results)
+    if not school_data.empty:
+        # Analyze data
+        results = analyze_data()
+        
+        # Output results (you could save to a file, display in a web app, etc.)
+        print(results)
+    else:
+        print("Error: No school data available. Cannot proceed with analysis.")
 
 if __name__ == "__main__":
     main()
